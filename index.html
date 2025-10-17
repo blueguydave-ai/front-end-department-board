@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Department - Student Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Combined CSS from all CSS files */
+        :root {
+            --primary: #0B4619;
+            --secondary: #116530;
+            --accent: #21B573;
+            --background: #A0E4CB;
+            --base: #F8F9FA;
+            --text-dark: #1a1a1a;
+            --text-light: #4a4a4a;
+            --white: #ffffff;
+            --gray-light: #e9ecef;
+            --gray: #6c757d;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
+            
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--base);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .nav__brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav__logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .nav__title {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .nav__menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav__list {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav__link {
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+        }
+
+        .nav__link:hover,
+        .nav__link.active {
+            color: var(--primary);
+            background-color: var(--background);
+        }
+
+        .nav__user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid var(--primary);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            display: none;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown__item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-dropdown__item:hover {
+            background-color: var(--gray-light);
+        }
+
+        .nav__toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .hamburger {
+            width: 25px;
+            height: 3px;
+            background: var(--primary);
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        /* Main Content */
+        .main {
+            min-height: calc(100vh - 80px);
+            padding: 2rem 0;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--background);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1100;
+        }
+
+        .toast {
+            background: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn--primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn--primary:hover:not(:disabled) {
+            background: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn--secondary {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .btn--secondary:hover:not(:disabled) {
+            background: #1a9d63;
+            transform: translateY(-1px);
+        }
+
+        .btn--outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn--outline:hover:not(:disabled) {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn--danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn--danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn--sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .btn--lg {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card__header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .card__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .card__subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .card__body {
+            padding: 1.5rem;
+        }
+
+        .card__footer {
+            padding: 1rem 1.5rem;
+            background: var(--gray-light);
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(33, 181, 115, 0.1);
+        }
+
+        .form-control.error {
+            border-color: var(--danger);
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .form-error {
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid--2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid--3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid--4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Announcement Cards */
+        .announcement-card {
+            border-left: 4px solid var(--primary);
+        }
+
+        .announcement-card.featured {
+            border-left-color: var(--accent);
+        }
+
+        .announcement-card.urgent {
+            border-left-color: var(--danger);
+        }
+
+        .announcement-card__category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--background);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .announcement-card__title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .announcement-card__content {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .announcement-card__meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .announcement-card__actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Quick Action Cards */
+        .quick-action {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+        }
+
+        .quick-action__icon {
+            width: 60px;
+            height: 60px;
+            background: var(--background);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .quick-action__title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-action__description {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Search and Filter */
+        .search-box {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-box__input {
+            padding-left: 2.5rem;
+        }
+
+        .search-box__icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            background: var(--white);
+            cursor: pointer;
+        }
+
+        /* Results Table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .results-table th {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .results-table tr:hover {
+            background: var(--gray-light);
+        }
+
+        /* Profile Section */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            border: 4px solid var(--primary);
+        }
+
+        .profile-info h2 {
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .profile-info p {
+            color: var(--text-light);
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+
+        .mb-0 { margin-bottom: 0; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 2rem; }
+
+        .mt-0 { margin-top: 0; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        .mt-4 { margin-top: 2rem; }
+
+        .p-0 { padding: 0; }
+        .p-1 { padding: 0.5rem; }
+        .p-2 { padding: 1rem; }
+        .p-3 { padding: 1.5rem; }
+        .p-4 { padding: 2rem; }
+
+        .d-none { display: none; }
+        .d-block { display: block; }
+        .d-flex { display: flex; }
+        .d-grid { display: grid; }
+
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .align-center { align-items: center; }
+
+        .w-100 { width: 100%; }
+        .h-100 { height: 100%; }
+
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .nav__menu {
+                position: fixed;
+                top: 80px;
+                right: -100%;
+                width: 80%;
+                height: calc(100vh - 80px);
+                background: var(--white);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                padding: 2rem;
+                transition: right 0.3s ease;
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .nav__menu.active {
+                right: 0;
+            }
+            
+            .nav__list {
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+            }
+            
+            .nav__link {
+                display: block;
+                padding: 1rem;
+                border-bottom: 1px solid var(--gray-light);
+            }
+            
+            .nav__user {
+                margin-top: 2rem;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .user-dropdown {
+                position: static;
+                box-shadow: none;
+                border: 1px solid var(--gray-light);
+                margin-top: 0.5rem;
+            }
+            
+            .nav__toggle {
+                display: flex;
+            }
+            
+            .nav__toggle.active .hamburger:nth-child(1) {
+                transform: rotate(-45deg) translate(-5px, 6px);
+            }
+            
+            .nav__toggle.active .hamburger:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .nav__toggle.active .hamburger:nth-child(3) {
+                transform: rotate(45deg) translate(-5px, -6px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav__brand {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .nav__title {
+                font-size: 1rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .announcement-card__meta {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .results-table {
+                font-size: 0.875rem;
+            }
+            
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem;
+            }
+            
+            .toast {
+                min-width: auto;
+                width: calc(100vw - 2rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <div class="nav__brand">
+                <div class="nav__logo">🎓</div>
+                <span class="nav__title">Computer Science Department</span>
+            </div>
+            
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list" id="nav-list">
+                    <!-- Navigation items will be populated by JavaScript -->
+                </ul>
+                
+                <div class="nav__user" id="nav-user">
+                    <!-- User menu will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="nav__toggle" id="nav-toggle">
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main" id="main-content">
+        <!-- Pages will be dynamically loaded here -->
+        <div id="loading-spinner" class="loading-spinner d-none">
+            <div class="spinner"></div>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        // Combined JavaScript - Helpers Class
+        class Helpers {
+            static formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            static debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            static getInitials(name) {
+                return name
+                    .split(' ')
+                    .map(part => part.charAt(0))
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2);
+            }
+
+            static showToast(message, type = 'success', duration = 5000) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : '⚠';
+                toast.innerHTML = `
+                    <span class="toast__icon">${icon}</span>
+                    <span class="toast__message">${message}</span>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, duration);
+            }
+
+            static showLoading() {
+                const spinner = document.getElementById('loading-spinner');
+                if (spinner) spinner.classList.remove('d-none');
+            }
+
+            static hideLoading() {
+                const spinner = document.getElementById('loading-spinner');
+                if (spinner) spinner.classList.add('d-none');
+            }
+
+            static validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            static validatePhone(phone) {
+                const re = /^\+?[\d\s-()]{10,}$/;
+                return re.test(phone);
+            }
+
+            static sanitizeInput(input) {
+                const div = document.createElement('div');
+                div.textContent = input;
+                return div.innerHTML;
+            }
+
+            static getLevelLabel(level) {
+                const levels = {
+                    100: '100 Level',
+                    200: '200 Level',
+                    300: '300 Level',
+                    400: '400 Level',
+                    500: '500 Level'
+                };
+                return levels[level] || `${level} Level`;
+            }
+
+            static getCategoryLabel(category) {
+                const categories = {
+                    general: 'General',
+                    exam: 'Exam',
+                    registration: 'Registration',
+                    security: 'Security',
+                    event: 'Event'
+                };
+                return categories[category] || category;
+            }
+        }
+
+        // Validators Class
+        class Validators {
+            static validateSignupForm(formData) {
+                const errors = {};
+
+                // Name validation
+                if (!formData.name.trim()) {
+                    errors.name = 'Name is required';
+                } else if (formData.name.trim().length < 2) {
+                    errors.name = 'Name must be at least 2 characters';
+                }
+
+                // Email validation
+                if (!formData.email.trim()) {
+                    errors.email = 'Email is required';
+                } else if (!Helpers.validateEmail(formData.email)) {
+                    errors.email = 'Please enter a valid email address';
+                }
+
+                // Matric number validation
+                if (!formData.matricNumber.trim()) {
+                    errors.matricNumber = 'Matric number is required';
+                }
+
+                // Level validation
+                if (!formData.level) {
+                    errors.level = 'Level is required';
+                } else if (![100, 200, 300, 400, 500].includes(parseInt(formData.level))) {
+                    errors.level = 'Please select a valid level';
+                }
+
+                // Student type validation
+                if (!formData.studentType) {
+                    errors.studentType = 'Student type is required';
+                }
+
+                // Phone validation
+                if (!formData.phone.trim()) {
+                    errors.phone = 'Phone number is required';
+                } else if (!Helpers.validatePhone(formData.phone)) {
+                    errors.phone = 'Please enter a valid phone number';
+                }
+
+                // Password validation
+                if (!formData.password) {
+                    errors.password = 'Password is required';
+                } else if (formData.password.length < 6) {
+                    errors.password = 'Password must be at least 6 characters';
+                }
+
+                return {
+                    isValid: Object.keys(errors).length === 0,
+                    errors
+                };
+            }
+
+            static validateLoginForm(formData) {
+                const errors = {};
+
+                if (!formData.identifier || !formData.identifier.trim()) {
+                    errors.identifier = 'Email or matric number is required';
+                }
+
+                if (!formData.password) {
+                    errors.password = 'Password is required';
+                }
+
+                return {
+                    isValid: Object.keys(errors).length === 0,
+                    errors
+                };
+            }
+
+            static validateProfileForm(formData) {
+                const errors = {};
+
+                if (!formData.name.trim()) {
+                    errors.name = 'Name is required';
+                }
+
+                if (!formData.email.trim()) {
+                    errors.email = 'Email is required';
+                } else if (!Helpers.validateEmail(formData.email)) {
+                    errors.email = 'Please enter a valid email address';
+                }
+
+                if (!formData.phone.trim()) {
+                    errors.phone = 'Phone number is required';
+                } else if (!Helpers.validatePhone(formData.phone)) {
+                    errors.phone = 'Please enter a valid phone number';
+                }
+
+                return {
+                    isValid: Object.keys(errors).length === 0,
+                    errors
+                };
+            }
+        }
+
+        // API Class - FIXED VERSION
+        class API {
+    constructor() {
+        // This will work for both localhost and production
+        this.baseURL = window.location.hostname === 'localhost' 
+            ? 'http://https://department-board-backend.onrender.com/api' 
+            : 'https://department-board-backend.onrender.com/api';
+        this.token = localStorage.getItem('authToken');
+    }
+
+            async request(endpoint, options = {}) {
+                const url = `${this.baseURL}${endpoint}`;
+                
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                };
+
+                // Add authorization header if token exists
+                if (this.token) {
+                    config.headers.Authorization = `Bearer ${this.token}`;
+                }
+
+                try {
+                    console.log(`Making API request to: ${url}`);
+                    const response = await fetch(url, config);
+
+                    let data;
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        data = await response.text();
+                    }
+
+                    if (!response.ok) {
+                        console.error('API Error Response:', data);
+                        throw new Error(data.error || data.message || `HTTP ${response.status}`);
+                    }
+
+                    console.log('API Success Response:', data);
+                    return data;
+                } catch (error) {
+                    console.error('API Request failed:', error);
+                    
+                    if (error.name === 'TypeError') {
+                        throw new Error('Network error - check if server is running');
+                    }
+                    
+                    throw error;
+                }
+            }
+
+            setToken(token) {
+                this.token = token;
+                localStorage.setItem('authToken', token);
+            }
+
+            removeToken() {
+                this.token = null;
+                localStorage.removeItem('authToken');
+            }
+
+            // Authentication endpoints
+            async signup(userData) {
+                return this.request('/auth/signup', {
+                    method: 'POST',
+                    body: JSON.stringify(userData)
+                });
+            }
+
+            async login(credentials) {
+                return this.request('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify(credentials)
+                });
+            }
+
+            // Student endpoints
+            async getStudentProfile() {
+                return this.request('/students/profile');
+            }
+
+            async updateStudentProfile(profileData) {
+                return this.request('/students/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(profileData)
+                });
+            }
+
+            async getStudentResults() {
+                return this.request('/students/results');
+            }
+
+            // FIXED: Archive endpoints
+            async archiveAnnouncement(announcementId) {
+                return this.request(`/students/archives/${announcementId}`, {
+                    method: 'POST'
+                });
+            }
+
+            async getArchivedItems() {
+                return this.request('/students/archives');
+            }
+
+            async removeFromArchive(archiveId) {
+                return this.request(`/students/archives/${archiveId}`, {
+                    method: 'DELETE'
+                });
+            }
+
+            // Announcements endpoints
+            async getAnnouncements(params = {}) {
+                const queryString = new URLSearchParams(params).toString();
+                const endpoint = queryString ? `/announcements?${queryString}` : '/announcements';
+                return this.request(endpoint);
+            }
+
+            async getFeaturedAnnouncements() {
+                return this.request('/announcements/featured');
+            }
+
+            async getAnnouncement(id) {
+                return this.request(`/announcements/${id}`);
+            }
+
+            // FIXED: Timetable endpoints
+            async getTimetable(level) {
+                // Use the student timetable endpoint instead of admin
+                return this.request('/students/timetable');
+            }
+
+            // Health check
+            async healthCheck() {
+                return this.request('/health');
+            }
+        }
+
+        // AuthManager Class
+        class AuthManager {
+            constructor() {
+                this.currentUser = null;
+                this.isAuthenticated = false;
+                this.init();
+            }
+
+            init() {
+                const token = localStorage.getItem('authToken');
+                const userData = localStorage.getItem('userData');
+                
+                if (token && userData) {
+                    try {
+                        this.currentUser = JSON.parse(userData);
+                        this.isAuthenticated = true;
+                        api.setToken(token);
+                        console.log('User restored from localStorage');
+                    } catch (error) {
+                        console.error('Error restoring user:', error);
+                        this.logout();
+                    }
+                }
+            }
+
+            async login(credentials) {
+                try {
+                    console.log('Attempting login with:', { 
+                        ...credentials, 
+                        password: credentials.password ? '***' : 'missing' 
+                    });
+                    
+                    const response = await api.login(credentials);
+                    
+                    this.currentUser = response.user;
+                    this.isAuthenticated = true;
+                    
+                    api.setToken(response.token);
+                    localStorage.setItem('userData', JSON.stringify(response.user));
+                    
+                    console.log('Login successful:', this.currentUser);
+                    Helpers.showToast('Login successful!', 'success');
+                    return { success: true, user: response.user };
+                } catch (error) {
+                    console.error('Login failed:', error);
+                    const errorMessage = error.message || 'Login failed. Please check your credentials.';
+                    Helpers.showToast(errorMessage, 'error');
+                    return { success: false, error: errorMessage };
+                }
+            }
+
+            async signup(userData) {
+                try {
+                    console.log('Attempting signup');
+                    const response = await api.signup(userData);
+                    
+                    this.currentUser = response.user;
+                    this.isAuthenticated = true;
+                    
+                    api.setToken(response.token);
+                    localStorage.setItem('userData', JSON.stringify(response.user));
+                    
+                    Helpers.showToast('Registration successful!', 'success');
+                    return { success: true, user: response.user };
+                } catch (error) {
+                    const errorMessage = error.message || 'Registration failed';
+                    Helpers.showToast(errorMessage, 'error');
+                    return { success: false, error: errorMessage };
+                }
+            }
+
+            logout() {
+                this.currentUser = null;
+                this.isAuthenticated = false;
+                
+                api.removeToken();
+                localStorage.removeItem('userData');
+                
+                Helpers.showToast('Logged out successfully', 'success');
+                window.location.hash = 'login';
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+
+            updateUserProfile(updatedUser) {
+                this.currentUser = { ...this.currentUser, ...updatedUser };
+                localStorage.setItem('userData', JSON.stringify(this.currentUser));
+            }
+        }
+
+        // Main Application Class
+        class StudentPortalApp {
+            constructor() {
+                this.currentPage = 'dashboard';
+                this.pages = {
+                    'login': this.renderLoginPage.bind(this),
+                    'signup': this.renderSignupPage.bind(this),
+                    'dashboard': this.renderDashboard.bind(this),
+                    'announcements': this.renderAnnouncementsPage.bind(this),
+                    'timetable': this.renderTimetablePage.bind(this),
+                    'profile': this.renderProfilePage.bind(this),
+                    'archive': this.renderArchivePage.bind(this)
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.handleRoute();
+            }
+
+            setupEventListeners() {
+                // Navigation toggle for mobile
+                const navToggle = document.getElementById('nav-toggle');
+                if (navToggle) {
+                    navToggle.addEventListener('click', this.toggleMobileMenu.bind(this));
+                }
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav__menu') && !e.target.closest('.nav__toggle')) {
+                        this.closeMobileMenu();
+                    }
+                });
+            }
+
+            toggleMobileMenu() {
+                const navMenu = document.getElementById('nav-menu');
+                const navToggle = document.getElementById('nav-toggle');
+                
+                if (navMenu) navMenu.classList.toggle('active');
+                if (navToggle) navToggle.classList.toggle('active');
+            }
+
+            closeMobileMenu() {
+                const navMenu = document.getElementById('nav-menu');
+                const navToggle = document.getElementById('nav-toggle');
+                
+                if (navMenu) navMenu.classList.remove('active');
+                if (navToggle) navToggle.classList.remove('active');
+            }
+
+            handleRoute() {
+                const hash = window.location.hash.replace('#', '') || 'dashboard';
+                
+                if (this.pages[hash]) {
+                    this.currentPage = hash;
+                    this.renderPage();
+                } else {
+                    this.navigateTo('dashboard');
+                }
+            }
+
+            navigateTo(page) {
+                if (this.pages[page]) {
+                    window.location.hash = page;
+                    this.currentPage = page;
+                    this.renderPage();
+                }
+            }
+
+            async renderPage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+
+                // Check authentication for protected routes
+                const protectedRoutes = ['dashboard', 'announcements', 'timetable', 'profile', 'archive'];
+                
+                if (protectedRoutes.includes(this.currentPage) && !authManager.isAuthenticated) {
+                    this.navigateTo('login');
+                    return;
+                }
+                
+                // Redirect to dashboard if already authenticated and trying to access auth pages
+                if (['login', 'signup'].includes(this.currentPage) && authManager.isAuthenticated) {
+                    this.navigateTo('dashboard');
+                    return;
+                }
+
+                Helpers.showLoading();
+                
+                try {
+                    await this.pages[this.currentPage]();
+                    this.updateNavigation();
+                } catch (error) {
+                    console.error('Error rendering page:', error);
+                    Helpers.showToast('Error loading page', 'error');
+                } finally {
+                    Helpers.hideLoading();
+                }
+            }
+
+            updateNavigation() {
+                const navList = document.getElementById('nav-list');
+                const navUser = document.getElementById('nav-user');
+                
+                if (!navList || !navUser) return;
+
+                if (!authManager.isAuthenticated) {
+                    navList.innerHTML = '';
+                    navUser.innerHTML = `
+                        <a href="#login" class="btn btn--outline btn--sm">Login</a>
+                        <a href="#signup" class="btn btn--primary btn--sm">Sign Up</a>
+                    `;
+                    return;
+                }
+
+                // Navigation items for authenticated users
+                const user = authManager.getCurrentUser();
+                navList.innerHTML = `
+                    <li><a href="#dashboard" class="nav__link ${this.currentPage === 'dashboard' ? 'active' : ''}">Dashboard</a></li>
+                    <li><a href="#announcements" class="nav__link ${this.currentPage === 'announcements' ? 'active' : ''}">Announcements</a></li>
+                    <li><a href="#timetable" class="nav__link ${this.currentPage === 'timetable' ? 'active' : ''}">Timetable</a></li>
+                    <li><a href="#profile" class="nav__link ${this.currentPage === 'profile' ? 'active' : ''}">Profile & Results</a></li>
+                    <li><a href="#archive" class="nav__link ${this.currentPage === 'archive' ? 'active' : ''}">Archive</a></li>
+                `;
+
+                // User menu
+                navUser.innerHTML = `
+                    <div class="user-menu">
+                        <div class="user-avatar" id="user-avatar">
+                            ${Helpers.getInitials(user.name)}
+                        </div>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-dropdown__item">
+                                <strong>${user.name}</strong>
+                            </div>
+                            <div class="user-dropdown__item">
+                                ${user.matricNumber}
+                            </div>
+                            <div class="user-dropdown__item">
+                                ${Helpers.getLevelLabel(user.level)}
+                            </div>
+                            <div class="user-dropdown__item" onclick="authManager.logout()">
+                                Logout
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // User dropdown toggle
+                const userAvatar = document.getElementById('user-avatar');
+                const userDropdown = document.getElementById('user-dropdown');
+                
+                if (userAvatar && userDropdown) {
+                    userAvatar.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        userDropdown.classList.toggle('show');
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', () => {
+                        userDropdown.classList.remove('show');
+                    });
+                }
+            }
+
+            // Page rendering methods
+            async renderLoginPage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="grid" style="grid-template-columns: 1fr; max-width: 400px; margin: 0 auto;">
+                            <div class="card">
+                                <div class="card__header text-center">
+                                    <h1 class="card__title">Welcome Back</h1>
+                                    <p class="card__subtitle">Sign in to your account</p>
+                                </div>
+                                <div class="card__body">
+                                    <form id="login-form">
+                                        <div class="form-group">
+                                            <label class="form-label" for="identifier">Email or Matric Number</label>
+                                            <input type="text" class="form-control" id="identifier" name="identifier" required>
+                                            <div class="form-error" id="identifier-error"></div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="password">Password</label>
+                                            <input type="password" class="form-control" id="password" name="password" required>
+                                            <div class="form-error" id="password-error"></div>
+                                        </div>
+                                        
+                                        <div class="form-group d-flex justify-between align-center">
+                                            <label class="form-label mb-0">
+                                                <input type="checkbox" id="remember" name="remember">
+                                                Remember me
+                                            </label>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn--primary w-100 mb-2">Sign In</button>
+                                        
+                                        <div class="text-center">
+                                            <p>Don't have an account? <a href="#signup" style="color: var(--primary); text-decoration: none;">Sign up</a></p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const loginForm = document.getElementById('login-form');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+                }
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const identifier = document.getElementById('identifier').value;
+                const password = document.getElementById('password').value;
+
+                console.log('Login attempt with:', { identifier, password: '***' });
+
+                const formData = {
+                    identifier: identifier,
+                    password: password
+                };
+
+                const validation = Validators.validateLoginForm(formData);
+                
+                if (!validation.isValid) {
+                    this.displayFormErrors(validation.errors);
+                    return;
+                }
+
+                this.clearFormErrors();
+
+                // Show loading state on button
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Signing In...';
+                submitBtn.disabled = true;
+
+                try {
+                    // Determine if identifier is email or matric number and format accordingly
+                    let loginData;
+                    if (Helpers.validateEmail(identifier)) {
+                        loginData = { email: identifier, password: password };
+                    } else {
+                        loginData = { matricNumber: identifier, password: password };
+                    }
+
+                    console.log('Sending login data to backend:', { ...loginData, password: '***' });
+                    
+                    const result = await authManager.login(loginData);
+                    
+                    if (result.success) {
+                        console.log('Login successful, navigating to dashboard');
+                        this.navigateTo('dashboard');
+                    } else {
+                        console.log('Login failed:', result.error);
+                    }
+                } catch (error) {
+                    console.error('Unexpected error during login:', error);
+                    Helpers.showToast('An unexpected error occurred', 'error');
+                } finally {
+                    // Restore button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async renderSignupPage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 0 auto;">
+                            <div class="card">
+                                <div class="card__header text-center">
+                                    <h1 class="card__title">Create Account</h1>
+                                    <p class="card__subtitle">Join the Computer Science Department</p>
+                                </div>
+                                <div class="card__body">
+                                    <form id="signup-form">
+                                        <div class="form-group">
+                                            <label class="form-label" for="name">Full Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" required>
+                                            <div class="form-error" id="name-error"></div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="email">Email Address</label>
+                                            <input type="email" class="form-control" id="email" name="email" required>
+                                            <div class="form-error" id="email-error"></div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="matricNumber">Matric Number</label>
+                                            <input type="text" class="form-control" id="matricNumber" name="matricNumber" required>
+                                            <div class="form-error" id="matricNumber-error"></div>
+                                        </div>
+                                        
+                                        <div class="grid grid--2">
+                                            <div class="form-group">
+                                                <label class="form-label" for="level">Level</label>
+                                                <select class="form-control" id="level" name="level" required>
+                                                    <option value="">Select Level</option>
+                                                    <option value="100">100 Level</option>
+                                                    <option value="200">200 Level</option>
+                                                    <option value="300">300 Level</option>
+                                                    <option value="400">400 Level</option>
+                                                    <option value="500">500 Level</option>
+                                                </select>
+                                                <div class="form-error" id="level-error"></div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label" for="studentType">Student Type</label>
+                                                <select class="form-control" id="studentType" name="studentType" required>
+                                                    <option value="">Select Type</option>
+                                                    <option value="Undergraduate">Undergraduate</option>
+                                                    <option value="Postgraduate">Postgraduate</option>
+                                                </select>
+                                                <div class="form-error" id="studentType-error"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="phone">Phone Number</label>
+                                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                                            <div class="form-error" id="phone-error"></div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="password">Password</label>
+                                            <input type="password" class="form-control" id="password" name="password" required>
+                                            <div class="form-error" id="password-error"></div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn--primary w-100 mb-2">Create Account</button>
+                                        
+                                        <div class="text-center">
+                                            <p>Already have an account? <a href="#login" style="color: var(--primary); text-decoration: none;">Sign in</a></p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const signupForm = document.getElementById('signup-form');
+                if (signupForm) {
+                    signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+                }
+            }
+
+            async handleSignup(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    matricNumber: document.getElementById('matricNumber').value,
+                    level: document.getElementById('level').value,
+                    studentType: document.getElementById('studentType').value,
+                    phone: document.getElementById('phone').value,
+                    password: document.getElementById('password').value
+                };
+
+                const validation = Validators.validateSignupForm(formData);
+                
+                if (!validation.isValid) {
+                    this.displayFormErrors(validation.errors);
+                    return;
+                }
+
+                this.clearFormErrors();
+
+                const result = await authManager.signup(formData);
+                
+                if (result.success) {
+                    this.navigateTo('dashboard');
+                }
+            }
+
+            async renderDashboard() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                const user = authManager.getCurrentUser();
+                
+                // Fetch featured announcements
+                let featuredAnnouncements = [];
+                try {
+                    const response = await api.getFeaturedAnnouncements();
+                    featuredAnnouncements = response.announcements || response || [];
+                } catch (error) {
+                    console.error('Error fetching featured announcements:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="mb-4">
+                            <h1>Welcome back, ${user.name}!</h1>
+                            <p class="text-light">Here's what's happening in the department today.</p>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="grid grid--4 mb-4">
+                            <div class="card quick-action" onclick="app.navigateTo('announcements')">
+                                <div class="quick-action__icon">📢</div>
+                                <h3 class="quick-action__title">Announcements</h3>
+                                <p class="quick-action__description">View all department announcements</p>
+                            </div>
+                            
+                            <div class="card quick-action" onclick="app.navigateTo('timetable')">
+                                <div class="quick-action__icon">📅</div>
+                                <h3 class="quick-action__title">Timetable</h3>
+                                <p class="quick-action__description">Check your class schedule</p>
+                            </div>
+                            
+                            <div class="card quick-action" onclick="app.navigateTo('profile')">
+                                <div class="quick-action__icon">📊</div>
+                                <h3 class="quick-action__title">Results</h3>
+                                <p class="quick-action__description">View your academic results</p>
+                            </div>
+                            
+                            <div class="card quick-action" onclick="app.navigateTo('archive')">
+                                <div class="quick-action__icon">📁</div>
+                                <h3 class="quick-action__title">Archive</h3>
+                                <p class="quick-action__description">Your saved announcements</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Featured Announcements -->
+                        <div class="card">
+                            <div class="card__header">
+                                <h2 class="card__title">Featured Announcements</h2>
+                                <p class="card__subtitle">Important updates from the department</p>
+                            </div>
+                            <div class="card__body">
+                                <div id="featured-announcements">
+                                    ${featuredAnnouncements.length === 0 ? 
+                                        '<p class="text-center text-light">No featured announcements at the moment.</p>' : 
+                                        this.renderAnnouncementsList(featuredAnnouncements)
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ANNOUNCEMENTS PAGE - FULLY IMPLEMENTED
+            async renderAnnouncementsPage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                // Fetch all announcements
+                let announcements = [];
+                try {
+                    const response = await api.getAnnouncements();
+                    announcements = response.announcements || response || [];
+                } catch (error) {
+                    console.error('Error fetching announcements:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="d-flex justify-between align-center mb-4">
+                            <div>
+                                <h1>Announcements</h1>
+                                <p class="text-light">Stay updated with department news</p>
+                            </div>
+                            <div class="search-box">
+                                <input type="text" class="form-control search-box__input" id="search-announcements" placeholder="Search announcements...">
+                                <span class="search-box__icon">🔍</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Filters -->
+                        <div class="card mb-4">
+                            <div class="card__body">
+                                <div class="filter-group">
+                                    <select class="filter-select" id="category-filter">
+                                        <option value="">All Categories</option>
+                                        <option value="general">General</option>
+                                        <option value="exam">Exam</option>
+                                        <option value="registration">Registration</option>
+                                        <option value="security">Security</option>
+                                        <option value="event">Event</option>
+                                    </select>
+                                    
+                                    <select class="filter-select" id="featured-filter">
+                                        <option value="">All Announcements</option>
+                                        <option value="featured">Featured Only</option>
+                                        <option value="urgent">Urgent Only</option>
+                                    </select>
+                                    
+                                    <button class="btn btn--outline" id="clear-filters">Clear Filters</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Announcements Grid -->
+                        <div class="grid grid--2" id="announcements-grid">
+                            ${this.renderAnnouncementsList(announcements)}
+                        </div>
+                        
+                        ${announcements.length === 0 ? 
+                            '<div class="text-center mt-4"><p>No announcements found.</p></div>' : 
+                            ''
+                        }
+                    </div>
+                `;
+
+                this.setupAnnouncementsFilters();
+            }
+
+            setupAnnouncementsFilters() {
+                const searchInput = document.getElementById('search-announcements');
+                const categoryFilter = document.getElementById('category-filter');
+                const featuredFilter = document.getElementById('featured-filter');
+                const clearFiltersBtn = document.getElementById('clear-filters');
+
+                const debouncedSearch = Helpers.debounce(async (searchTerm) => {
+                    await this.filterAnnouncements();
+                }, 300);
+
+                searchInput.addEventListener('input', (e) => {
+                    debouncedSearch(e.target.value);
+                });
+
+                categoryFilter.addEventListener('change', this.filterAnnouncements.bind(this));
+                featuredFilter.addEventListener('change', this.filterAnnouncements.bind(this));
+                
+                clearFiltersBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    categoryFilter.value = '';
+                    featuredFilter.value = '';
+                    this.filterAnnouncements();
+                });
+            }
+
+            async filterAnnouncements() {
+                const searchTerm = document.getElementById('search-announcements').value;
+                const category = document.getElementById('category-filter').value;
+                const featured = document.getElementById('featured-filter').value;
+
+                const params = {};
+                if (searchTerm) params.search = searchTerm;
+                if (category) params.category = category;
+                if (featured === 'featured') params.featured = true;
+                if (featured === 'urgent') params.urgent = true;
+
+                try {
+                    Helpers.showLoading();
+                    const response = await api.getAnnouncements(params);
+                    const announcementsGrid = document.getElementById('announcements-grid');
+                    announcementsGrid.innerHTML = this.renderAnnouncementsList(response.announcements || response || []);
+                } catch (error) {
+                    Helpers.showToast('Error filtering announcements', 'error');
+                } finally {
+                    Helpers.hideLoading();
+                }
+            }
+
+            // TIMETABLE PAGE - FIXED VERSION
+            async renderTimetablePage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                const user = authManager.getCurrentUser();
+                
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="mb-4">
+                            <h1>Class Timetable</h1>
+                            <p class="text-light">View and download your class schedules</p>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card__body">
+                                <div class="filter-group mb-4">
+                                    <select class="filter-select" id="level-select">
+                                        <option value="100">100 Level</option>
+                                        <option value="200">200 Level</option>
+                                        <option value="300">300 Level</option>
+                                        <option value="400">400 Level</option>
+                                        <option value="500">500 Level</option>
+                                    </select>
+                                    
+                                    <select class="filter-select" id="semester-select">
+                                        <option value="first">First Semester</option>
+                                        <option value="second">Second Semester</option>
+                                    </select>
+                                    
+                                    <button class="btn btn--primary" id="load-timetable">Load Timetable</button>
+                                </div>
+                                
+                                <div id="timetable-content">
+                                    <p class="text-center text-light">Select your level and semester to view timetable</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Set current user's level as default
+                document.getElementById('level-select').value = user.level || 200;
+                
+                document.getElementById('load-timetable').addEventListener('click', this.loadTimetable.bind(this));
+            }
+
+            async loadTimetable() {
+                const level = document.getElementById('level-select').value;
+                const semester = document.getElementById('semester-select').value;
+                
+                try {
+                    Helpers.showLoading();
+                    const timetable = await api.getTimetable(level);
+                    const timetableContent = document.getElementById('timetable-content');
+                    
+                    if (timetable && timetable.fileUrl) {
+                        timetableContent.innerHTML = `
+                            <div class="text-center">
+                                <h3>${timetable.title || `Timetable for ${Helpers.getLevelLabel(level)} - ${semester === 'first' ? 'First' : 'Second'} Semester`}</h3>
+                                <p class="mb-3">Click the button below to view/download the timetable</p>
+                                <a href="${timetable.fileUrl}" class="btn btn--primary" target="_blank">
+                                    📥 Download Timetable
+                                </a>
+                                <div class="mt-4">
+                                    <p><strong>Last Updated:</strong> ${timetable.updatedAt ? Helpers.formatDate(timetable.updatedAt) : 'N/A'}</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        timetableContent.innerHTML = `
+                            <p class="text-center text-light">No timetable available for ${Helpers.getLevelLabel(level)} ${semester} semester.</p>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Timetable error:', error);
+                    Helpers.showToast('Timetable not available for your level', 'warning');
+                    document.getElementById('timetable-content').innerHTML = `
+                        <p class="text-center text-light">Timetable not available. Please contact administration.</p>
+                    `;
+                } finally {
+                    Helpers.hideLoading();
+                }
+            }
+
+            // PROFILE & RESULTS PAGE - FULLY IMPLEMENTED
+            async renderProfilePage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                const user = authManager.getCurrentUser();
+                
+                // Fetch student results
+                let results = [];
+                try {
+                    const response = await api.getStudentResults();
+                    results = response.results || response || [];
+                } catch (error) {
+                    console.error('Error fetching results:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="grid grid--2">
+                            <!-- Profile Section -->
+                            <div>
+                                <div class="card mb-4">
+                                    <div class="card__header">
+                                        <h2 class="card__title">Profile Information</h2>
+                                    </div>
+                                    <div class="card__body">
+                                        <div class="profile-header">
+                                            <div class="profile-avatar">
+                                                ${Helpers.getInitials(user.name)}
+                                            </div>
+                                            <div class="profile-info">
+                                                <h2>${user.name}</h2>
+                                                <p>${user.matricNumber} • ${Helpers.getLevelLabel(user.level)}</p>
+                                                <p>${user.studentType} • ${user.department}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <form id="profile-form">
+                                            <div class="form-group">
+                                                <label class="form-label" for="profile-name">Full Name</label>
+                                                <input type="text" class="form-control" id="profile-name" name="name" value="${user.name}" required>
+                                                <div class="form-error" id="profile-name-error"></div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label" for="profile-email">Email Address</label>
+                                                <input type="email" class="form-control" id="profile-email" name="email" value="${user.email}" required>
+                                                <div class="form-error" id="profile-email-error"></div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label" for="profile-phone">Phone Number</label>
+                                                <input type="tel" class="form-control" id="profile-phone" name="phone" value="${user.phone || ''}" required>
+                                                <div class="form-error" id="profile-phone-error"></div>
+                                            </div>
+                                            
+                                            <button type="submit" class="btn btn--primary">Update Profile</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Results Section -->
+                            <div>
+                                <div class="card">
+                                    <div class="card__header">
+                                        <h2 class="card__title">Academic Results</h2>
+                                        <p class="card__subtitle">Your course grades and performance</p>
+                                    </div>
+                                    <div class="card__body">
+                                        ${results.length > 0 ? this.renderResultsTable(results) : `
+                                            <p class="text-center text-light">No results available at the moment.</p>
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('profile-form').addEventListener('submit', this.handleProfileUpdate.bind(this));
+            }
+
+            renderResultsTable(results) {
+                return `
+                    <div class="table-responsive">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Title</th>
+                                    <th>Grade</th>
+                                    <th>Semester</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${results.map(result => `
+                                    <tr>
+                                        <td>${result.courseCode}</td>
+                                        <td>${result.courseTitle}</td>
+                                        <td><strong>${result.grade}</strong></td>
+                                        <td>${result.semester}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            async handleProfileUpdate(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('profile-name').value,
+                    email: document.getElementById('profile-email').value,
+                    phone: document.getElementById('profile-phone').value
+                };
+
+                const validation = Validators.validateProfileForm(formData);
+                
+                if (!validation.isValid) {
+                    this.displayFormErrors(validation.errors, 'profile-');
+                    return;
+                }
+
+                this.clearFormErrors('profile-');
+
+                try {
+                    const response = await api.updateStudentProfile(formData);
+                    authManager.updateUserProfile(response.user);
+                    Helpers.showToast('Profile updated successfully', 'success');
+                } catch (error) {
+                    Helpers.showToast('Error updating profile', 'error');
+                }
+            }
+
+            // ARCHIVE PAGE - FULLY IMPLEMENTED
+            async renderArchivePage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                // Fetch archived items
+                let archivedItems = [];
+                try {
+                    const response = await api.getArchivedItems();
+                    archivedItems = response.archives || response || [];
+                } catch (error) {
+                    console.error('Error fetching archived items:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="mb-4">
+                            <h1>Archived Announcements</h1>
+                            <p class="text-light">Your saved announcements for quick reference</p>
+                        </div>
+                        
+                        ${archivedItems.length > 0 ? `
+                            <div class="grid grid--2" id="archive-grid">
+                                ${this.renderArchivedItemsList(archivedItems)}
+                            </div>
+                        ` : `
+                            <div class="card">
+                                <div class="card__body text-center">
+                                    <h3>No Archived Items</h3>
+                                    <p class="text-light">You haven't archived any announcements yet.</p>
+                                    <a href="#announcements" class="btn btn--primary">Browse Announcements</a>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            renderArchivedItemsList(archivedItems) {
+                return archivedItems.map(item => {
+                    const announcement = item.announcement || item;
+                    return `
+                        <div class="card announcement-card">
+                            <div class="card__body">
+                                <span class="announcement-card__category">
+                                    ${Helpers.getCategoryLabel(announcement.category)}
+                                </span>
+                                <h3 class="announcement-card__title">${Helpers.sanitizeInput(announcement.title)}</h3>
+                                <div class="announcement-card__content">
+                                    ${Helpers.sanitizeInput(announcement.content)}
+                                </div>
+                                <div class="announcement-card__meta">
+                                    <span>Archived on ${Helpers.formatDate(item.archivedAt || item.createdAt)}</span>
+                                </div>
+                                <div class="announcement-card__actions">
+                                    <button class="btn btn--danger btn--sm" onclick="app.removeFromArchive('${item.id}')">
+                                        🗑️ Remove
+                                    </button>
+                                    ${announcement.fileUrl ? `
+                                        <a href="${announcement.fileUrl}" class="btn btn--outline btn--sm" target="_blank">
+                                            📎 Attachment
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            async removeFromArchive(archiveId) {
+                try {
+                    await api.removeFromArchive(archiveId);
+                    Helpers.showToast('Removed from archive', 'success');
+                    // Refresh the archive page
+                    this.renderArchivePage();
+                } catch (error) {
+                    Helpers.showToast('Error removing from archive', 'error');
+                }
+            }
+
+            // Shared rendering methods
+            renderAnnouncementsList(announcements) {
+                return announcements.map(announcement => `
+                    <div class="card announcement-card ${announcement.isFeatured ? 'featured' : ''} ${announcement.isUrgent ? 'urgent' : ''}">
+                        <div class="card__body">
+                            <span class="announcement-card__category">
+                                ${Helpers.getCategoryLabel(announcement.category)}
+                            </span>
+                            <h3 class="announcement-card__title">${Helpers.sanitizeInput(announcement.title)}</h3>
+                            <div class="announcement-card__content">
+                                ${Helpers.sanitizeInput(announcement.content)}
+                            </div>
+                            <div class="announcement-card__meta">
+                                <span>By ${announcement.author?.name || 'Department'}</span>
+                                <span>${Helpers.formatDate(announcement.createdAt)}</span>
+                            </div>
+                            <div class="announcement-card__actions">
+                                <button class="btn btn--secondary btn--sm" onclick="app.archiveAnnouncement('${announcement.id}')">
+                                    📁 Archive
+                                </button>
+                                ${announcement.fileUrl ? `
+                                    <a href="${announcement.fileUrl}" class="btn btn--outline btn--sm" target="_blank">
+                                        📎 Attachment
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Utility methods
+            displayFormErrors(errors, prefix = '') {
+                Object.keys(errors).forEach(field => {
+                    const errorElement = document.getElementById(`${prefix}${field}-error`);
+                    if (errorElement) {
+                        errorElement.textContent = errors[field];
+                        errorElement.classList.add('show');
+                        
+                        const inputElement = document.getElementById(`${prefix}${field}`);
+                        if (inputElement) {
+                            inputElement.classList.add('error');
+                        }
+                    }
+                });
+            }
+
+            clearFormErrors(prefix = '') {
+                const errorElements = document.querySelectorAll('.form-error');
+                errorElements.forEach(element => {
+                    element.classList.remove('show');
+                    element.textContent = '';
+                });
+
+                const inputElements = document.querySelectorAll('.form-control');
+                inputElements.forEach(element => {
+                    element.classList.remove('error');
+                });
+            }
+
+            async archiveAnnouncement(announcementId) {
+                try {
+                    await api.archiveAnnouncement(announcementId);
+                    Helpers.showToast('Announcement archived successfully', 'success');
+                } catch (error) {
+                    Helpers.showToast('Error archiving announcement', 'error');
+                }
+            }
+        }
+
+        // Create global instances
+        const api = new API();
+        const authManager = new AuthManager();
+        const app = new StudentPortalApp();
+
+        // Handle hash changes
+        window.addEventListener('hashchange', () => {
+            app.handleRoute();
+        });
+
+        // Make app globally available for onclick handlers
+        window.app = app;
+        window.authManager = authManager;
+
+        console.log('Student Portal App initialized');
+    </script>
+</body>
+</html>
