@@ -322,7 +322,7 @@
             }
         }
 
-        // API Class - FIXED VERSION (This was causing the slowness!)
+        // API Class - FIXED VERSION
         class API {
             constructor() {
                 this.baseURL = 'https://department-board-backend.onrender.com/api';
@@ -561,9 +561,9 @@
                     'dashboard': this.renderDashboard.bind(this),
                     'announcements': this.renderAnnouncementsPage.bind(this),
                     'timetable': this.renderTimetablePage.bind(this),
+                    'courses': this.renderCoursesPage.bind(this),
                     'profile': this.renderProfilePage.bind(this),
-                    'archive': this.renderArchivePage.bind(this),
-                    'courses': this.renderCoursesPage.bind(this)
+                    'archive': this.renderArchivePage.bind(this)
                 };
                 
                 this.init();
@@ -629,7 +629,7 @@
                 if (!mainContent) return;
 
                 // Check authentication for protected routes
-                const protectedRoutes = ['dashboard', 'announcements', 'timetable', 'profile', 'archive', 'courses'];
+                const protectedRoutes = ['dashboard', 'announcements', 'timetable', 'courses', 'profile', 'archive'];
                 
                 if (protectedRoutes.includes(this.currentPage) && !authManager.isAuthenticated) {
                     this.navigateTo('login');
@@ -952,6 +952,26 @@
                 
                 const user = authManager.getCurrentUser();
                 
+                // Debug information
+                console.log('Dashboard - User:', user);
+                console.log('Dashboard - Is Authenticated:', authManager.isAuthenticated);
+                
+                // If user is not authenticated, show login prompt
+                if (!user || !authManager.isAuthenticated) {
+                    mainContent.innerHTML = `
+                        <div class="container">
+                            <div class="card text-center">
+                                <div class="card__body">
+                                    <h2>Authentication Required</h2>
+                                    <p>Please log in to access the dashboard.</p>
+                                    <a href="#login" class="btn btn--primary">Go to Login</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
                 // Get current academic year
                 const currentYear = new Date().getFullYear();
                 const academicYear = `${currentYear}`;
@@ -1023,9 +1043,7 @@
                                     <p class="card__subtitle">Important updates from the department</p>
                                 </div>
                                 <div class="card__body">
-                                    <div id="featured-announcements">
-                                        ${this.generateSampleAnnouncements()}
-                                    </div>
+                                    ${this.generateSampleAnnouncements()}
                                 </div>
                             </div>
                             
@@ -1055,7 +1073,82 @@
                 `;
             }
 
-            // NEW: Courses Page
+            // Generate sample announcements for dashboard
+            generateSampleAnnouncements() {
+                const sampleAnnouncements = [
+                    {
+                        id: '1',
+                        title: 'Mid-Semester Examination Schedule - 2026',
+                        content: 'The mid-semester examinations for 2026 will commence from March 15th, 2026. All students are advised to check their timetable and prepare accordingly.',
+                        category: 'exam',
+                        isFeatured: true,
+                        createdAt: new Date().toISOString(),
+                        author: { name: 'Exam Department' }
+                    },
+                    {
+                        id: '2', 
+                        title: 'Course Registration Deadline Extended - 2026',
+                        content: 'The deadline for 2026 course registration has been extended to February 28th, 2026. Please complete your registration before the new deadline.',
+                        category: 'registration',
+                        isUrgent: true,
+                        createdAt: new Date().toISOString(),
+                        author: { name: 'Academic Office' }
+                    },
+                    {
+                        id: '3',
+                        title: 'New Course Offerings - 2026',
+                        content: 'Several new courses including Advanced AI and Cloud Computing have been added to the 2026 curriculum. Check the courses page for details.',
+                        category: 'general',
+                        isFeatured: true,
+                        createdAt: new Date().toISOString(),
+                        author: { name: 'Curriculum Committee' }
+                    }
+                ];
+                
+                return this.renderAnnouncementsList(sampleAnnouncements);
+            }
+
+            // Render announcements list
+            renderAnnouncementsList(announcements) {
+                if (!announcements || announcements.length === 0) {
+                    return '<p class="text-center text-light">No announcements available.</p>';
+                }
+                
+                return announcements.map(announcement => `
+                    <div class="card announcement-card ${announcement.isFeatured ? 'featured' : ''} ${announcement.isUrgent ? 'urgent' : ''}">
+                        <div class="card__body">
+                            <span class="announcement-card__category">
+                                ${Helpers.getCategoryLabel(announcement.category)}
+                            </span>
+                            <h3 class="announcement-card__title">${Helpers.sanitizeInput(announcement.title)}</h3>
+                            <div class="announcement-card__content">
+                                ${Helpers.sanitizeInput(announcement.content)}
+                            </div>
+                            <div class="announcement-card__meta">
+                                <span>By ${announcement.author?.name || 'Department'}</span>
+                                <span>${Helpers.formatDate(announcement.createdAt)}</span>
+                            </div>
+                            <div class="announcement-card__actions">
+                                <button class="btn btn--secondary btn--sm" onclick="app.archiveAnnouncement('${announcement.id}')">
+                                    📁 Archive
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Archive announcement method
+            async archiveAnnouncement(announcementId) {
+                try {
+                    await api.archiveAnnouncement(announcementId);
+                    Helpers.showToast('Announcement archived successfully', 'success');
+                } catch (error) {
+                    Helpers.showToast('Error archiving announcement', 'error');
+                }
+            }
+
+            // Courses page render method
             async renderCoursesPage() {
                 const mainContent = document.getElementById('main-content');
                 if (!mainContent) return;
@@ -1074,6 +1167,7 @@
                 `;
             }
 
+            // Generate course cards for courses page
             generateCourseCards() {
                 const courses = [
                     {
@@ -1146,43 +1240,450 @@
                 `).join('');
             }
 
-            generateSampleAnnouncements() {
-                const sampleAnnouncements = [
-                    {
-                        id: '1',
-                        title: 'Mid-Semester Examination Schedule - 2026',
-                        content: 'The mid-semester examinations for 2026 will commence from March 15th, 2026. All students are advised to check their timetable and prepare accordingly.',
-                        category: 'exam',
-                        isFeatured: true,
-                        createdAt: new Date().toISOString(),
-                        author: { name: 'Exam Department' }
-                    },
-                    {
-                        id: '2', 
-                        title: 'Course Registration Deadline Extended - 2026',
-                        content: 'The deadline for 2026 course registration has been extended to February 28th, 2026. Please complete your registration before the new deadline.',
-                        category: 'registration',
-                        isUrgent: true,
-                        createdAt: new Date().toISOString(),
-                        author: { name: 'Academic Office' }
-                    },
-                    {
-                        id: '3',
-                        title: 'New Course Offerings - 2026',
-                        content: 'Several new courses including Advanced AI and Cloud Computing have been added to the 2026 curriculum. Check the courses page for details.',
-                        category: 'general',
-                        isFeatured: true,
-                        createdAt: new Date().toISOString(),
-                        author: { name: 'Curriculum Committee' }
-                    }
-                ];
+            // ANNOUNCEMENTS PAGE
+            async renderAnnouncementsPage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
                 
-                return this.renderAnnouncementsList(sampleAnnouncements);
+                // Fetch all announcements
+                let announcements = [];
+                try {
+                    const response = await api.getAnnouncements();
+                    announcements = response.announcements || response || [];
+                } catch (error) {
+                    console.error('Error fetching announcements:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="d-flex justify-between align-center mb-4">
+                            <div>
+                                <h1>Announcements</h1>
+                                <p class="text-light">Stay updated with department news</p>
+                            </div>
+                            <div class="search-box">
+                                <input type="text" class="form-control search-box__input" id="search-announcements" placeholder="Search announcements...">
+                                <span class="search-box__icon">🔍</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Filters -->
+                        <div class="card mb-4">
+                            <div class="card__body">
+                                <div class="filter-group">
+                                    <select class="filter-select" id="category-filter">
+                                        <option value="">All Categories</option>
+                                        <option value="general">General</option>
+                                        <option value="exam">Exam</option>
+                                        <option value="registration">Registration</option>
+                                        <option value="security">Security</option>
+                                        <option value="event">Event</option>
+                                    </select>
+                                    
+                                    <select class="filter-select" id="featured-filter">
+                                        <option value="">All Announcements</option>
+                                        <option value="featured">Featured Only</option>
+                                        <option value="urgent">Urgent Only</option>
+                                    </select>
+                                    
+                                    <button class="btn btn--outline" id="clear-filters">Clear Filters</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Announcements Grid -->
+                        <div class="grid grid--2" id="announcements-grid">
+                            ${this.renderAnnouncementsList(announcements)}
+                        </div>
+                        
+                        ${announcements.length === 0 ? 
+                            '<div class="text-center mt-4"><p>No announcements found.</p></div>' : 
+                            ''
+                        }
+                    </div>
+                `;
+
+                this.setupAnnouncementsFilters();
             }
 
-            // Your existing methods continue here (announcements, timetable, profile, archive, etc.)
-            // ... [All your existing methods remain the same] ...
+            setupAnnouncementsFilters() {
+                const searchInput = document.getElementById('search-announcements');
+                const categoryFilter = document.getElementById('category-filter');
+                const featuredFilter = document.getElementById('featured-filter');
+                const clearFiltersBtn = document.getElementById('clear-filters');
 
+                const debouncedSearch = Helpers.debounce(async (searchTerm) => {
+                    await this.filterAnnouncements();
+                }, 300);
+
+                searchInput.addEventListener('input', (e) => {
+                    debouncedSearch(e.target.value);
+                });
+
+                categoryFilter.addEventListener('change', this.filterAnnouncements.bind(this));
+                featuredFilter.addEventListener('change', this.filterAnnouncements.bind(this));
+                
+                clearFiltersBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    categoryFilter.value = '';
+                    featuredFilter.value = '';
+                    this.filterAnnouncements();
+                });
+            }
+
+            async filterAnnouncements() {
+                const searchTerm = document.getElementById('search-announcements').value;
+                const category = document.getElementById('category-filter').value;
+                const featured = document.getElementById('featured-filter').value;
+
+                const params = {};
+                if (searchTerm) params.search = searchTerm;
+                if (category) params.category = category;
+                if (featured === 'featured') params.featured = true;
+                if (featured === 'urgent') params.urgent = true;
+
+                try {
+                    Helpers.showLoading();
+                    const response = await api.getAnnouncements(params);
+                    const announcementsGrid = document.getElementById('announcements-grid');
+                    announcementsGrid.innerHTML = this.renderAnnouncementsList(response.announcements || response || []);
+                } catch (error) {
+                    Helpers.showToast('Error filtering announcements', 'error');
+                } finally {
+                    Helpers.hideLoading();
+                }
+            }
+
+            // TIMETABLE PAGE
+            async renderTimetablePage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                const user = authManager.getCurrentUser();
+                
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="mb-4">
+                            <h1>Class Timetable</h1>
+                            <p class="text-light">View and download your class schedules</p>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card__body">
+                                <div class="filter-group mb-4">
+                                    <select class="filter-select" id="level-select">
+                                        <option value="100">100 Level</option>
+                                        <option value="200">200 Level</option>
+                                        <option value="300">300 Level</option>
+                                        <option value="400">400 Level</option>
+                                        <option value="500">500 Level</option>
+                                    </select>
+                                    
+                                    <select class="filter-select" id="semester-select">
+                                        <option value="first">First Semester</option>
+                                        <option value="second">Second Semester</option>
+                                    </select>
+                                    
+                                    <button class="btn btn--primary" id="load-timetable">Load Timetable</button>
+                                </div>
+                                
+                                <div id="timetable-content">
+                                    <p class="text-center text-light">Select your level and semester to view timetable</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Set current user's level as default
+                document.getElementById('level-select').value = user.level || 200;
+                
+                document.getElementById('load-timetable').addEventListener('click', this.loadTimetable.bind(this));
+            }
+
+            async loadTimetable() {
+                const level = document.getElementById('level-select').value;
+                const semester = document.getElementById('semester-select').value;
+                
+                try {
+                    Helpers.showLoading();
+                    const timetable = await api.getTimetable(level);
+                    const timetableContent = document.getElementById('timetable-content');
+                    
+                    if (timetable && timetable.fileUrl) {
+                        timetableContent.innerHTML = `
+                            <div class="text-center">
+                                <h3>${timetable.title || `Timetable for ${Helpers.getLevelLabel(level)} - ${semester === 'first' ? 'First' : 'Second'} Semester`}</h3>
+                                <p class="mb-3">Click the button below to view/download the timetable</p>
+                                <a href="${timetable.fileUrl}" class="btn btn--primary" target="_blank">
+                                    📥 Download Timetable
+                                </a>
+                                <div class="mt-4">
+                                    <p><strong>Last Updated:</strong> ${timetable.updatedAt ? Helpers.formatDate(timetable.updatedAt) : 'N/A'}</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        timetableContent.innerHTML = `
+                            <p class="text-center text-light">No timetable available for ${Helpers.getLevelLabel(level)} ${semester} semester.</p>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Timetable error:', error);
+                    Helpers.showToast('Timetable not available for your level', 'warning');
+                    document.getElementById('timetable-content').innerHTML = `
+                        <p class="text-center text-light">Timetable not available. Please contact administration.</p>
+                    `;
+                } finally {
+                    Helpers.hideLoading();
+                }
+            }
+
+            // PROFILE & RESULTS PAGE
+            async renderProfilePage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                const user = authManager.getCurrentUser();
+                
+                // Fetch student results
+                let results = [];
+                try {
+                    const response = await api.getStudentResults();
+                    results = response.results || response || [];
+                } catch (error) {
+                    console.error('Error fetching results:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="grid grid--2">
+                            <!-- Profile Section -->
+                            <div>
+                                <div class="card mb-4">
+                                    <div class="card__header">
+                                        <h2 class="card__title">Profile Information</h2>
+                                    </div>
+                                    <div class="card__body">
+                                        <div class="profile-header">
+                                            <div class="profile-avatar">
+                                                ${Helpers.getInitials(user.name)}
+                                            </div>
+                                            <div class="profile-info">
+                                                <h2>${user.name}</h2>
+                                                <p>${user.matricNumber} • ${Helpers.getLevelLabel(user.level)}</p>
+                                                <p>${user.studentType} • ${user.department}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <form id="profile-form">
+                                            <div class="form-group">
+                                                <label class="form-label" for="profile-name">Full Name</label>
+                                                <input type="text" class="form-control" id="profile-name" name="name" value="${user.name}" required>
+                                                <div class="form-error" id="profile-name-error"></div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label" for="profile-email">Email Address</label>
+                                                <input type="email" class="form-control" id="profile-email" name="email" value="${user.email}" required>
+                                                <div class="form-error" id="profile-email-error"></div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label" for="profile-phone">Phone Number</label>
+                                                <input type="tel" class="form-control" id="profile-phone" name="phone" value="${user.phone || ''}" required>
+                                                <div class="form-error" id="profile-phone-error"></div>
+                                            </div>
+                                            
+                                            <button type="submit" class="btn btn--primary">Update Profile</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Results Section -->
+                            <div>
+                                <div class="card">
+                                    <div class="card__header">
+                                        <h2 class="card__title">Academic Results</h2>
+                                        <p class="card__subtitle">Your course grades and performance</p>
+                                    </div>
+                                    <div class="card__body">
+                                        ${results.length > 0 ? this.renderResultsTable(results) : `
+                                            <p class="text-center text-light">No results available at the moment.</p>
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('profile-form').addEventListener('submit', this.handleProfileUpdate.bind(this));
+            }
+
+            renderResultsTable(results) {
+                return `
+                    <div class="table-responsive">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Title</th>
+                                    <th>Grade</th>
+                                    <th>Semester</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${results.map(result => `
+                                    <tr>
+                                        <td>${result.courseCode}</td>
+                                        <td>${result.courseTitle}</td>
+                                        <td><strong>${result.grade}</strong></td>
+                                        <td>${result.semester}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            async handleProfileUpdate(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('profile-name').value,
+                    email: document.getElementById('profile-email').value,
+                    phone: document.getElementById('profile-phone').value
+                };
+
+                const validation = Validators.validateProfileForm(formData);
+                
+                if (!validation.isValid) {
+                    this.displayFormErrors(validation.errors, 'profile-');
+                    return;
+                }
+
+                this.clearFormErrors('profile-');
+
+                try {
+                    const response = await api.updateStudentProfile(formData);
+                    authManager.updateUserProfile(response.user);
+                    Helpers.showToast('Profile updated successfully', 'success');
+                } catch (error) {
+                    Helpers.showToast('Error updating profile', 'error');
+                }
+            }
+
+            // ARCHIVE PAGE
+            async renderArchivePage() {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
+                
+                // Fetch archived items
+                let archivedItems = [];
+                try {
+                    const response = await api.getArchivedItems();
+                    archivedItems = response.archives || response || [];
+                } catch (error) {
+                    console.error('Error fetching archived items:', error);
+                }
+
+                mainContent.innerHTML = `
+                    <div class="container">
+                        <div class="mb-4">
+                            <h1>Archived Announcements</h1>
+                            <p class="text-light">Your saved announcements for quick reference</p>
+                        </div>
+                        
+                        ${archivedItems.length > 0 ? `
+                            <div class="grid grid--2" id="archive-grid">
+                                ${this.renderArchivedItemsList(archivedItems)}
+                            </div>
+                        ` : `
+                            <div class="card">
+                                <div class="card__body text-center">
+                                    <h3>No Archived Items</h3>
+                                    <p class="text-light">You haven't archived any announcements yet.</p>
+                                    <a href="#announcements" class="btn btn--primary">Browse Announcements</a>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            renderArchivedItemsList(archivedItems) {
+                return archivedItems.map(item => {
+                    const announcement = item.announcement || item;
+                    return `
+                        <div class="card announcement-card">
+                            <div class="card__body">
+                                <span class="announcement-card__category">
+                                    ${Helpers.getCategoryLabel(announcement.category)}
+                                </span>
+                                <h3 class="announcement-card__title">${Helpers.sanitizeInput(announcement.title)}</h3>
+                                <div class="announcement-card__content">
+                                    ${Helpers.sanitizeInput(announcement.content)}
+                                </div>
+                                <div class="announcement-card__meta">
+                                    <span>Archived on ${Helpers.formatDate(item.archivedAt || item.createdAt)}</span>
+                                </div>
+                                <div class="announcement-card__actions">
+                                    <button class="btn btn--danger btn--sm" onclick="app.removeFromArchive('${item.id}')">
+                                        🗑️ Remove
+                                    </button>
+                                    ${announcement.fileUrl ? `
+                                        <a href="${announcement.fileUrl}" class="btn btn--outline btn--sm" target="_blank">
+                                            📎 Attachment
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            async removeFromArchive(archiveId) {
+                try {
+                    await api.removeFromArchive(archiveId);
+                    Helpers.showToast('Removed from archive', 'success');
+                    // Refresh the archive page
+                    this.renderArchivePage();
+                } catch (error) {
+                    Helpers.showToast('Error removing from archive', 'error');
+                }
+            }
+
+            // Form error handling methods
+            displayFormErrors(errors, prefix = '') {
+                Object.keys(errors).forEach(field => {
+                    const errorElement = document.getElementById(`${prefix}${field}-error`);
+                    if (errorElement) {
+                        errorElement.textContent = errors[field];
+                        errorElement.classList.add('show');
+                        
+                        const inputElement = document.getElementById(`${prefix}${field}`);
+                        if (inputElement) {
+                            inputElement.classList.add('error');
+                        }
+                    }
+                });
+            }
+
+            clearFormErrors(prefix = '') {
+                const errorElements = document.querySelectorAll('.form-error');
+                errorElements.forEach(element => {
+                    element.classList.remove('show');
+                    element.textContent = '';
+                });
+
+                const inputElements = document.querySelectorAll('.form-control');
+                inputElements.forEach(element => {
+                    element.classList.remove('error');
+                });
+            }
         }
 
         // Create global instances
