@@ -1,14 +1,4 @@
-/* styles.css - Base styles and layout */
-
-/* Header & Navigation */
-.header {
-    background: var(--white);
-    box-shadow: var(--shadow-sm);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
+/* Fix Navigation Styles - Add this to your existing style tag */
 .nav {
     display: flex;
     justify-content: space-between;
@@ -42,6 +32,8 @@
     display: flex;
     list-style: none;
     gap: 2rem;
+    margin: 0;
+    padding: 0;
 }
 
 .nav__link {
@@ -74,27 +66,6 @@
     gap: 1rem;
 }
 
-.nav__toggle {
-    display: none;
-    flex-direction: column;
-    cursor: pointer;
-}
-
-.hamburger {
-    width: 25px;
-    height: 3px;
-    background: var(--text-dark);
-    margin: 3px 0;
-    transition: 0.3s;
-}
-
-/* Main Content */
-.main {
-    padding: 2rem 0;
-    min-height: calc(100vh - 80px);
-}
-
-/* Additional base styles that aren't in components.css */
 .user-menu {
     position: relative;
 }
@@ -110,6 +81,7 @@
     justify-content: center;
     font-weight: 600;
     cursor: pointer;
+    font-size: 0.9rem;
 }
 
 .user-dropdown {
@@ -123,6 +95,7 @@
     min-width: 200px;
     display: none;
     z-index: 1000;
+    border: 1px solid var(--gray-light);
 }
 
 .user-dropdown.show {
@@ -133,6 +106,7 @@
     padding: 0.75rem 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-size: 0.9rem;
 }
 
 .user-dropdown__item:hover {
@@ -143,91 +117,53 @@
     border-bottom: 1px solid var(--gray-light);
 }
 
-/* Loading Spinner */
-.loading-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--gray-light);
-    border-left: 4px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Toast Notifications */
-.toast-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1100;
-}
-
-.toast {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--white);
-    padding: 1rem 1.5rem;
+/* Button Styles */
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow-lg);
-    margin-bottom: 0.5rem;
-    animation: slideIn 0.3s ease;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    gap: 0.5rem;
 }
 
-.toast.success {
-    border-left: 4px solid var(--success);
+.btn--primary {
+    background: var(--primary);
+    color: var(--white);
 }
 
-.toast.error {
-    border-left: 4px solid var(--danger);
+.btn--primary:hover {
+    background: var(--secondary);
+    transform: translateY(-1px);
 }
 
-.toast__icon {
-    font-weight: bold;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Course Cards */
-.course-card {
-    border-left: 4px solid var(--accent);
-}
-
-.course-code {
-    font-weight: 600;
+.btn--outline {
+    background: transparent;
+    border: 2px solid var(--primary);
     color: var(--primary);
-    font-size: 1.1rem;
 }
 
-.course-credits {
-    background: var(--background);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
+.btn--outline:hover {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.btn--sm {
+    padding: 0.5rem 1rem;
     font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--primary);
 }
 
-.department-news {
-    border-left: 4px solid var(--secondary);
+/* Header */
+.header {
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
